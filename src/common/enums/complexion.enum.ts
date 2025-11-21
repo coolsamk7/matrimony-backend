@@ -1,0 +1,8 @@
+export enum Complexion {
+  VERY_FAIR = 'VERY_FAIR',
+  FAIR = 'FAIR',
+  WHEATISH = 'WHEATISH',
+  WHEATISH_BROWN = 'WHEATISH_BROWN',
+  MEDIUM = 'MEDIUM',
+  DARK = 'DARK',
+}
