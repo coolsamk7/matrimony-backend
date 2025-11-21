@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import loggerConfig from './config/logger.config';
 import databaseConfig from './config/database.config';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import databaseConfig from './config/database.config';
       useFactory: (configService: ConfigService) => configService.get('database'),
     }),
     LoggerModule.forRoot(loggerConfig),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
