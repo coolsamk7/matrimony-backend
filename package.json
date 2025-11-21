@@ -28,11 +28,12 @@
     "changeset:version": "changeset version",
     "changeset:publish": "changeset publish",
     "prepare": "husky",
-    "lint:staged": "lint-staged"
+    "lint:staged": "lint-staged",
+    "lint:check": "eslint \"{src,apps,libs,test}/**/*.ts\""
   },
   "lint-staged": {
     "*.ts": [
-      "eslint --fix",
+      "eslint --fix --max-warnings=0",
       "prettier --write"
     ],
     "*.{json,md}": [

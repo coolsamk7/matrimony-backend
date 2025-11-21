@@ -1,4 +1,11 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-yarn lint:staged
+# Run lint-staged and exit if it fails
+yarn lint:staged || {
+  echo ""
+  echo "❌ Pre-commit hook failed!"
+  echo "   Fix all linting errors before committing."
+  echo "   Run 'yarn lint' to see and fix errors."
+  exit 1
+}
