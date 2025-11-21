@@ -7,6 +7,7 @@ import type { StringValue } from 'ms';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AccessService } from './access.service';
+import { OtpService } from './otp.service';
 import { User, RefreshToken } from '@/common/database/entities';
 import { JwtStrategy } from '@/common/strategies';
 
@@ -27,7 +28,7 @@ import { JwtStrategy } from '@/common/strategies';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AccessService, JwtStrategy],
+  providers: [AuthService, AccessService, OtpService, JwtStrategy],
   exports: [AuthService, AccessService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}

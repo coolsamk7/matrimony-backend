@@ -6,7 +6,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { PoliciesGuard } from './common/modules/casl';
 import { CaslAbilityFactory } from './common/modules/casl';
-import { JwtAuthGuard } from './common/guards';
+import { JwtAuthGuard, ProfileCompletionGuard } from './common/guards';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
@@ -31,12 +31,13 @@ async function bootstrap() {
     }),
   );
 
-  // Global guards - JWT Auth and CASL Authorization
+  // Global guards - JWT Auth, CASL Authorization, and Profile Completion
   const reflector = app.get(Reflector);
   const caslAbilityFactory = app.get(CaslAbilityFactory);
   app.useGlobalGuards(
     new JwtAuthGuard(reflector),
     new PoliciesGuard(reflector, caslAbilityFactory),
+    new ProfileCompletionGuard(reflector),
   );
 
   // Global prefix for all routes

@@ -10,8 +10,16 @@ import * as bcrypt from 'bcrypt';
 import { ulid } from 'ulid';
 import { User, RefreshToken } from '@/common/database/entities';
 import { Role } from '@/common/enums';
-import { RegisterDto, LoginDto, AuthResponseDto, RefreshTokenDto } from '@/common/dto';
+import {
+  RegisterDto,
+  LoginDto,
+  AuthResponseDto,
+  RefreshTokenDto,
+  RequestOtpDto,
+  CompleteRegistrationDto,
+} from '@/common/dto';
 import { AccessService } from './access.service';
+import { OtpService } from './otp.service';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +29,7 @@ export class AuthService {
     @InjectRepository(RefreshToken)
     private refreshTokenRepository: Repository<RefreshToken>,
     private accessService: AccessService,
+    private otpService: OtpService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
@@ -185,5 +194,90 @@ export class AuthService {
         role: user.role,
       },
     };
+  }
+
+  /**
+   * NEW REGISTRATION FLOW WITH OTP (2-STEP)
+   */
+
+  /**
+   * Step 1: Request OTP - Send OTP to mobile number
+   */
+  async requestOtp(requestOtpDto: RequestOtpDto): Promise<{ message: string }> {
+    const { mobile } = requestOtpDto;
+
+    // Check if mobile already registered
+    const existingUser = await this.userRepository.findOne({ where: { mobile } });
+    if (existingUser) {
+      throw new ConflictException('Mobile number already registered');
+    }
+
+    // Send OTP via third-party service
+    const otpResult = await this.otpService.sendOtp(mobile);
+
+    if (!otpResult.success) {
+      throw new BadRequestException('Failed to send OTP. Please try again.');
+    }
+
+    return {
+      message: 'OTP sent successfully to your mobile number',
+    };
+  }
+
+  /**
+   * Step 2: Verify OTP and Complete Registration - All in one step
+   */
+  async completeRegistration(completeRegDto: CompleteRegistrationDto): Promise<AuthResponseDto> {
+    const { mobile, otp, username, password, email, dateOfBirth, gender } = completeRegDto;
+
+    // Verify OTP with third-party service
+    const verificationResult = await this.otpService.verifyOtp(mobile, otp);
+
+    if (!verificationResult.success) {
+      throw new UnauthorizedException('Invalid or expired OTP');
+    }
+
+    // Check if mobile already registered
+    const existingMobile = await this.userRepository.findOne({ where: { mobile } });
+    if (existingMobile) {
+      throw new ConflictException('Mobile number already registered');
+    }
+
+    // Check if username already exists
+    const existingUsername = await this.userRepository.findOne({ where: { username } });
+    if (existingUsername) {
+      throw new ConflictException('Username already exists');
+    }
+
+    // Check email if provided
+    if (email) {
+      const existingEmail = await this.userRepository.findOne({ where: { email } });
+      if (existingEmail) {
+        throw new ConflictException('Email already registered');
+      }
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user with all data
+    const user = this.userRepository.create({
+      id: ulid(),
+      username,
+      email,
+      mobile,
+      password: hashedPassword,
+      dateOfBirth: new Date(dateOfBirth),
+      gender,
+      role: Role.APPLICATION_USER,
+      isMobileVerified: true,
+      isEmailVerified: false,
+      isProfileComplete: false, // User needs to complete profile details later
+    });
+
+    await this.userRepository.save(user);
+
+    // Generate tokens and return
+    return this.generateAuthResponse(user);
   }
 }

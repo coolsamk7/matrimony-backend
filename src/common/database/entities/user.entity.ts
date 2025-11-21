@@ -32,6 +32,21 @@ export class User extends BaseEntity {
   })
   role: Role;
 
+  @Column({ default: false })
+  isProfileComplete: boolean;
+
+  @Column({ default: false })
+  isMobileVerified: boolean;
+
+  @Column({ default: false })
+  isEmailVerified: boolean;
+
+  @Column({ type: 'date', nullable: true })
+  dateOfBirth: Date;
+
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  gender: string;
+
   // Relations
   @OneToOne(() => UserProfile, (profile) => profile.user)
   profile: UserProfile;

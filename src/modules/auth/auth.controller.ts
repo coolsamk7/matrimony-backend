@@ -1,7 +1,14 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, RefreshTokenDto, AuthResponseDto } from '@/common/dto';
+import {
+  RegisterDto,
+  LoginDto,
+  RefreshTokenDto,
+  AuthResponseDto,
+  RequestOtpDto,
+  CompleteRegistrationDto,
+} from '@/common/dto';
 import { Public, Protected, AuthenticatedUser } from '@/common/decorators';
 import { Action } from '@/common/enums';
 import { User } from '@/common/database/entities';
@@ -80,5 +87,47 @@ export class AuthController {
   @ApiResponse({ status: HttpStatus.OK, description: 'User profile retrieved successfully' })
   async getProfile(@AuthenticatedUser() user: User) {
     return user;
+  }
+
+  // NEW OTP-BASED REGISTRATION ENDPOINTS (2-STEP FLOW)
+
+  @Public()
+  @Post('request-otp')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Step 1: Request OTP for registration',
+    description: 'Send OTP to mobile number for verification.',
+  })
+  @ApiResponse({ status: HttpStatus.OK, description: 'OTP sent successfully' })
+  @ApiResponse({ status: HttpStatus.CONFLICT, description: 'Mobile already registered' })
+  async requestOtp(@Body() requestOtpDto: RequestOtpDto): Promise<{ message: string }> {
+    return this.authService.requestOtp(requestOtpDto);
+  }
+
+  @Public()
+  @Post('complete-registration')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Step 2: Verify OTP and complete registration',
+    description:
+      'Verify OTP and complete registration with all user details (mobile, OTP, username, password, email, DOB, gender).',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Registration completed successfully',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired OTP',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Username, email, or mobile already exists',
+  })
+  async completeRegistration(
+    @Body() completeRegDto: CompleteRegistrationDto,
+  ): Promise<AuthResponseDto> {
+    return this.authService.completeRegistration(completeRegDto);
   }
 }
