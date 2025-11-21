@@ -29,7 +29,9 @@
     "changeset:publish": "changeset publish",
     "prepare": "husky",
     "lint:staged": "lint-staged",
-    "lint:check": "eslint \"{src,apps,libs,test}/**/*.ts\""
+    "lint:check": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "openapi:generate": "curl http://localhost:3000/api/docs-json -o openapi.json && npx @openapitools/openapi-generator-cli generate -i openapi.json -g dart-dio -o ./generated/flutter --additional-properties=pubName=matrimony_api,pubVersion=1.0.0",
+    "openapi:download": "curl http://localhost:3000/api/docs-json -o openapi.json"
   },
   "lint-staged": {
     "*.ts": [
@@ -70,6 +72,7 @@
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
+    "@openapitools/openapi-generator-cli": "^2.25.2",
     "@types/bcrypt": "^6.0.0",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.1",

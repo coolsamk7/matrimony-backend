@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.10.0",
+    "generators": {
+      "flutter": {
+        "generatorName": "dart-dio",
+        "output": "./generated/flutter",
+        "glob": "openapi.json",
+        "additionalProperties": {
+          "pubName": "matrimony_api",
+          "pubVersion": "1.0.0",
+          "pubDescription": "Auto-generated Dart/Flutter API client for Matrimony Backend",
+          "pubAuthor": "Matrimony Team",
+          "nullableFields": true,
+          "dateLibrary": "core"
+        },
+        "typeMappings": {},
+        "reservedWordsMappings": {}
+      }
+    }
+  }
+}

@@ -4,17 +4,14 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ulid } from 'ulid';
-import type { StringValue } from 'ms';
 import { User, RefreshToken } from '@/common/database/entities';
 import { Role } from '@/common/enums';
 import { RegisterDto, LoginDto, AuthResponseDto, RefreshTokenDto } from '@/common/dto';
-import { JwtPayload } from '@/common/strategies';
+import { AccessService } from './access.service';
 
 @Injectable()
 export class AuthService {
@@ -23,8 +20,7 @@ export class AuthService {
     private userRepository: Repository<User>,
     @InjectRepository(RefreshToken)
     private refreshTokenRepository: Repository<RefreshToken>,
-    private jwtService: JwtService,
-    private configService: ConfigService,
+    private accessService: AccessService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
@@ -93,11 +89,9 @@ export class AuthService {
     const { refreshToken } = refreshTokenDto;
 
     // Verify refresh token
-    let payload: JwtPayload;
+    let payload;
     try {
-      payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      });
+      payload = this.accessService.verifyRefreshToken(refreshToken);
     } catch (error) {
       throw new UnauthorizedException('Invalid refresh token');
     }
@@ -158,41 +152,18 @@ export class AuthService {
   }
 
   private async generateAuthResponse(user: User): Promise<AuthResponseDto> {
-    const accessTokenExpiry = this.configService.get<string>('JWT_ACCESS_EXPIRY', '15m') || '15m';
-    const refreshTokenExpiry = this.configService.get<string>('JWT_REFRESH_EXPIRY', '7d') || '7d';
-
     // Generate access token
-    const accessTokenPayload: JwtPayload = {
-      sub: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      type: 'access',
-    };
-
-    const accessToken = this.jwtService.sign(accessTokenPayload, {
-      secret: this.configService.get<string>('JWT_SECRET'),
-      expiresIn: accessTokenExpiry as StringValue,
-    });
+    const accessToken = this.accessService.generateAccessToken(user);
 
     // Generate refresh token
-    const refreshTokenPayload: JwtPayload = {
-      sub: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      type: 'refresh',
-    };
+    const refreshToken = this.accessService.generateRefreshToken(user);
 
-    const refreshToken = this.jwtService.sign(refreshTokenPayload, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      expiresIn: refreshTokenExpiry as StringValue,
-    });
+    // Calculate expiry date for refresh token
+    const refreshTokenExpiry = this.accessService.getRefreshTokenExpirySeconds();
+    const expiresAt = new Date();
+    expiresAt.setSeconds(expiresAt.getSeconds() + refreshTokenExpiry);
 
     // Store refresh token
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
-
     const refreshTokenEntity = this.refreshTokenRepository.create({
       id: ulid(),
       userId: user.id,
@@ -206,7 +177,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      expiresIn: 900, // 15 minutes in seconds
+      expiresIn: this.accessService.getAccessTokenExpirySeconds(),
       user: {
         id: user.id,
         username: user.username,

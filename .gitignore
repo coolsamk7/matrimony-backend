@@ -54,3 +54,7 @@ lerna-debug.log*
 .tmp
 temp/
 tmp/
+
+# Generated Flutter API client
+generated/
+openapi.json

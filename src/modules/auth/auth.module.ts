@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import type { StringValue } from 'ms';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { AccessService } from './access.service';
 import { User, RefreshToken } from '@/common/database/entities';
 import { JwtStrategy } from '@/common/strategies';
 
@@ -26,7 +27,7 @@ import { JwtStrategy } from '@/common/strategies';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService, JwtStrategy, PassportModule],
+  providers: [AuthService, AccessService, JwtStrategy],
+  exports: [AuthService, AccessService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}
