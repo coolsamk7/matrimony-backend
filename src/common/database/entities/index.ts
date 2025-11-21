@@ -1,0 +1,11 @@
+export { BaseEntity } from './base.entity';
+export { User } from './user.entity';
+export { UserProfile } from './user-profile.entity';
+export { ContactInfo } from './contact-info.entity';
+export { Education } from './education.entity';
+export { UsersFamily } from './users-family.entity';
+export { ReligionInfo } from './religion-info.entity';
+export { Patrika } from './patrika.entity';
+export { UserPreferences } from './user-preferences.entity';
+export { ProfileVisited } from './profile-visited.entity';
+export { UserBlockedProfile } from './user-blocked-profile.entity';
