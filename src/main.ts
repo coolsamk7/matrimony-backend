@@ -5,42 +5,40 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-    const app = await NestFactory.create<NestFastifyApplication>(
-        AppModule,
-        new FastifyAdapter(),
-        { bufferLogs: true },
-    );
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
+    bufferLogs: true,
+  });
 
-    // Use Pino logger
-    app.useLogger(app.get(Logger));
+  // Use Pino logger
+  app.useLogger(app.get(Logger));
 
-    // Enable CORS
-    app.enableCors();
+  // Enable CORS
+  app.enableCors();
 
-    // Global prefix for all routes
-    app.setGlobalPrefix('api/v1');
+  // Global prefix for all routes
+  app.setGlobalPrefix('api/v1');
 
-    // Swagger documentation setup
-    const config = new DocumentBuilder()
-        .setTitle('Matrimony Backend API')
-        .setDescription('API documentation for Matrimony Backend')
-        .setVersion('1.0')
-        .addTag('matrimony')
-        .addBearerAuth()
-        .build();
+  // Swagger documentation setup
+  const config = new DocumentBuilder()
+    .setTitle('Matrimony Backend API')
+    .setDescription('API documentation for Matrimony Backend')
+    .setVersion('1.0')
+    .addTag('matrimony')
+    .addBearerAuth()
+    .build();
 
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document, {
-        swaggerOptions: {
-            persistAuthorization: true,
-        },
-    });
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
 
-    const port = process.env.PORT || 3000;
-    await app.listen(port, '0.0.0.0');
+  const port = process.env.PORT || 3000;
+  await app.listen(port, '0.0.0.0');
 
-    console.log(`🚀 Application is running on: http://localhost:${port}/api/v1`);
-    console.log(`📚 Swagger documentation: http://localhost:${port}/api/docs`);
+  console.log(`🚀 Application is running on: http://localhost:${port}/api/v1`);
+  console.log(`📚 Swagger documentation: http://localhost:${port}/api/docs`);
 }
 
 bootstrap();

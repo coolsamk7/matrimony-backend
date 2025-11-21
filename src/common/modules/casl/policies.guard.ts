@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  ForbiddenException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { CaslAbilityFactory, AppAbility } from './casl-ability.factory';
 import { CHECK_POLICIES_KEY, PolicyHandler } from './policies.decorator';
@@ -17,10 +12,7 @@ export class PoliciesGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const policyHandlers =
-      this.reflector.get<PolicyHandler[]>(
-        CHECK_POLICIES_KEY,
-        context.getHandler(),
-      ) || [];
+      this.reflector.get<PolicyHandler[]>(CHECK_POLICIES_KEY, context.getHandler()) || [];
 
     if (policyHandlers.length === 0) {
       return true;
@@ -40,9 +32,7 @@ export class PoliciesGuard implements CanActivate {
     );
 
     if (!hasPermission) {
-      throw new ForbiddenException(
-        'You do not have permission to perform this action',
-      );
+      throw new ForbiddenException('You do not have permission to perform this action');
     }
 
     return hasPermission;
