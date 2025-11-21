@@ -9,3 +9,4 @@ export { Patrika } from './patrika.entity';
 export { UserPreferences } from './user-preferences.entity';
 export { ProfileVisited } from './profile-visited.entity';
 export { UserBlockedProfile } from './user-blocked-profile.entity';
+export { RefreshToken } from './refresh-token.entity';

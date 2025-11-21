@@ -11,11 +11,10 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ulid } from 'ulid';
 import type { StringValue } from 'ms';
-import { User } from '@/common/database/entities';
+import { User, RefreshToken } from '@/common/database/entities';
 import { Role } from '@/common/enums';
-import { RefreshToken } from './entities';
-import { RegisterDto, LoginDto, AuthResponseDto, RefreshTokenDto } from './dto';
-import { JwtPayload } from './strategies';
+import { RegisterDto, LoginDto, AuthResponseDto, RefreshTokenDto } from '@/common/dto';
+import { JwtPayload } from '@/common/strategies';
 
 @Injectable()
 export class AuthService {

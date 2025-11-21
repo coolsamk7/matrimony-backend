@@ -10,7 +10,7 @@ import { Patrika } from '@common/database/entities/patrika.entity';
 import { UserPreferences } from '@common/database/entities/user-preferences.entity';
 import { ProfileVisited } from '@common/database/entities/profile-visited.entity';
 import { UserBlockedProfile } from '@common/database/entities/user-blocked-profile.entity';
-import { RefreshToken } from '@/modules/auth/entities';
+import { RefreshToken } from '@common/database/entities/refresh-token.entity';
 
 export default registerAs(
   'database',

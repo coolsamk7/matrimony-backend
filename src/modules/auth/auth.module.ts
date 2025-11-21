@@ -6,9 +6,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import type { StringValue } from 'ms';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { User } from '@/common/database/entities';
-import { RefreshToken } from './entities';
-import { JwtStrategy } from './strategies';
+import { User, RefreshToken } from '@/common/database/entities';
+import { JwtStrategy } from '@/common/strategies';
 
 @Module({
   imports: [
