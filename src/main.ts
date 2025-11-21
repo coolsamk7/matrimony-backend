@@ -1,9 +1,12 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Logger } from 'nestjs-pino';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { PoliciesGuard } from './common/modules/casl';
+import { CaslAbilityFactory } from './common/modules/casl';
+import { JwtAuthGuard } from './common/guards';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
@@ -26,6 +29,14 @@ async function bootstrap() {
         enableImplicitConversion: true,
       },
     }),
+  );
+
+  // Global guards - JWT Auth and CASL Authorization
+  const reflector = app.get(Reflector);
+  const caslAbilityFactory = app.get(CaslAbilityFactory);
+  app.useGlobalGuards(
+    new JwtAuthGuard(reflector),
+    new PoliciesGuard(reflector, caslAbilityFactory),
   );
 
   // Global prefix for all routes

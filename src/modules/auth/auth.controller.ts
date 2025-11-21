@@ -3,12 +3,17 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, RefreshTokenDto, AuthResponseDto } from '@/common/dto';
 import { JwtAuthGuard } from '@/common/guards';
+import { Public } from '@/common/decorators';
+import { CheckPolicies } from '@/common/modules/casl';
+import { Action } from '@/common/enums';
+import { User } from '@/common/database/entities';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user' })
@@ -25,6 +30,7 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login with email/username and password' })
@@ -41,6 +47,7 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
@@ -57,6 +64,7 @@ export class AuthController {
     return this.authService.refreshToken(refreshTokenDto);
   }
 
+  @Public()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout user and revoke refresh token' })
@@ -71,12 +79,17 @@ export class AuthController {
 
   @Post('revoke-all')
   @UseGuards(JwtAuthGuard)
+  @CheckPolicies((ability) => ability.can(Action.UPDATE, User))
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Revoke all refresh tokens for the current user' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'All tokens successfully revoked',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Insufficient permissions',
   })
   async revokeAll(@Req() req): Promise<{ message: string }> {
     await this.authService.revokeAllTokens(req.user.id);
@@ -85,11 +98,16 @@ export class AuthController {
 
   @Get('profile')
   @UseGuards(JwtAuthGuard)
+  @CheckPolicies((ability) => ability.can(Action.READ, User))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'User profile retrieved successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Insufficient permissions',
   })
   async getProfile(@Req() req) {
     return req.user;
