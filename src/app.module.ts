@@ -5,6 +5,7 @@ import { LoggerModule } from 'nestjs-pino';
 import databaseConfig from './config/database.config';
 import loggerConfig from './config/logger.config';
 import { AuthModule } from './modules/auth/auth.module';
+import { ProfileModule } from './modules/profile/profile.module';
 import { CaslModule } from './common/modules/casl';
 
 @Module({
@@ -21,6 +22,7 @@ import { CaslModule } from './common/modules/casl';
     LoggerModule.forRoot(loggerConfig),
     CaslModule,
     AuthModule,
+    ProfileModule,
   ],
 })
 export class AppModule {}

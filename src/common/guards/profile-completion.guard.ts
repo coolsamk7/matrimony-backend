@@ -37,6 +37,7 @@ export class ProfileCompletionGuard implements CanActivate {
       '/auth/logout',
       '/auth/refresh',
       '/auth/revoke-all',
+      '/profile/', // Allow all profile endpoints for profile completion
     ];
 
     const path = request.route?.path || request.url;
@@ -47,7 +48,7 @@ export class ProfileCompletionGuard implements CanActivate {
     // Check if profile is complete
     if (!user.isProfileComplete) {
       throw new ForbiddenException(
-        'Please complete your profile before accessing this feature. Use POST /auth/complete-registration endpoint.',
+        'Please complete your profile to access this feature. Complete all profile sections: basic info, contact info, education, religion info, and family.',
       );
     }
 
